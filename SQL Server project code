@@ -1,1 +1,401 @@
 
+11. SQL Implementation
+11.1Database Creation
+CREATE DATABASE FOODAPP;
+11.2Tables Implemented
+-- 1.Users table
+
+CREATE TABLE Users(
+
+USERID INT PRIMARY KEY,
+FULLNAME NVARCHAR(100),
+EMAIL NVARCHAR(100) UNIQUE,
+PHONENAME NVARCHAR (11),
+CREATEAT DATETIME DEFAULT GETDATE()
+);
+
+--2.ADDRESSES Table
+
+CREATE TABLE Addresses (
+    ADDRESSESID INT PRIMARY KEY,
+    USERID INT FOREIGN KEY REFERENCES Users(USERID),
+    ADDRESSLINE NVARCHAR(255),
+    CITY NVARCHAR(100) UNIQUE,
+    STATE NVARCHAR(100),
+    PINCODE NVARCHAR(10),
+    CREATEDAT DATETIME DEFAULT GETDATE()
+);
+
+--3.Vendors Table
+CREATE TABLE Vendors (
+    VENDORID INT PRIMARY KEY,
+    VENDORNAME NVARCHAR(255),
+    CONTACTMAIL NVARCHAR(100),
+    CREATEDAT DATETIME DEFAULT GETDATE()
+);
+
+--4. ProductCategories Table
+CREATE TABLE ProductCategories (
+    CATEGORIESID INT PRIMARY KEY,
+    CATEGORIESNAME NVARCHAR(100) NOT NULL,
+    
+);
+
+  
+--5.PRODUCTS TABLE 
+CREATE TABLE Products(
+    PRODUCTSID INT PRIMARY KEY IDENTITY(1,1),
+    PRODUCTSNAME  NVARCHAR(100) NOT NULL,
+    DESCRIPTION NVARCHAR(255),
+    CATEGORIESID INT FOREIGN KEY REFERENCES ProductCategories(CATEGORIESID),
+    PRICE DECIMAL (10,2) ,
+    CREATEDAT DATETIME DEFAULT GETDATE()
+);
+
+--6.INVENTORY TABLE 
+CREATE TABLE Inventory(
+    INVENTORYID INT PRIMARY KEY,
+    VENDORID INT FOREIGN KEY REFERENCES Vendors(VENDORID),
+    PRODUCTSID INT FOREIGN KEY REFERENCES Products(PRODUCTSID),
+    QUANTITYAVAILABLE INT  ,
+    LASTUPDATED DATETIME DEFAULT GETDATE()
+);
+
+--7. ORDERS TABLE 
+CREATE TABLE Orders (
+    ORDERSID INT PRIMARY KEY IDENTITY(1,1),
+    VENDORID INT FOREIGN KEY REFERENCES Vendors(VENDORID),
+    USERID INT FOREIGN KEY REFERENCES Users(USERID),
+    ORDERUPDATE DATETIME DEFAULT GETDATE(),
+    TOTALAMOUNT DECIMAL(10,2)
+);
+
+
+-- 8.ORDERS TABLE 
+CREATE TABLE OrdersItem (
+    ORDERSITEMID INT PRIMARY KEY,
+    ORDERSID INT FOREIGN KEY REFERENCES Orders(ORDERSID),
+    PRODUCTSID INT FOREIGN KEY REFERENCES Products(PRODUCTSID),
+    QUANTITY INT,
+    PRICE DECIMAL(10,2)
+);
+
+--9.Payments Table 
+
+CREATE TABLE Payments (
+    PAYMENTID INT PRIMARY KEY,
+    ORDERSID INT FOREIGN KEY REFERENCES Orders(ORDERSID),
+    PAYMENTMODE NVARCHAR(50),
+    PAYMENTSTATUS NVARCHAR(50),
+    PAIDAT DATETIME DEFAULT GETDATE()
+);
+
+-- 10.Delivery Payments Table 
+CREATE TABLE DeliveryPayments (
+    PARTNERID INT PRIMARY KEY,
+    FULLNAME  NVARCHAR(50),
+    PAYMENTSTATUS NVARCHAR(11),
+   
+);
+
+--11. Status Table 
+CREATE TABLE Status (
+    STATUSID INT PRIMARY KEY,
+    STATUSNAME  NVARCHAR(50),
+);
+
+
+--12.Status Table
+ 
+CREATE TABLE DeliveryStatus (
+    DELIVERYID INT PRIMARY KEY,
+    ORDERSID INT FOREIGN KEY REFERENCES Orders(ORDERSID),
+    STATUSID INT FOREIGN KEY REFERENCES Status(STATUSID),
+    UPDATEDAT DATETIME DEFAULT GETDATE()
+);
+
+
+--13.Reviews  TABLE 
+CREATE TABLE Reviews (
+    REVIEWSID INT PRIMARY KEY,
+    USERID INT FOREIGN KEY REFERENCES Users(USERID),
+     PRODUCTSID INT FOREIGN KEY REFERENCES Products(PRODUCTSID),
+    RATING INT CHECK (RATING BETWEEN 1 AND 5),
+    COMMENT NVARCHAR(150),
+    CREATEDAT DATETIME DEFAULT GETDATE()
+);
+
+(All tables use Primary Keys, Foreign Keys, Constraints & Defaults)
+
+
+12. Advanced SQL Features Used
+12.1 Views
+Used to simplify complex joins and reporting.
+OrderSummary
+ProductSales
+CREATE VIEW OrderSummary AS
+SELECT 
+    O.ORDERSID,
+    U.FULLNAME,
+    V.VENDORNAME,
+    O.TOTALAMOUNT,
+    O.ORDERUPDATE
+FROM Orders O
+JOIN Users U ON O.USERID = U.USERID
+JOIN Vendors V ON O.VENDORID = V.VENDORID;
+
+
+SELECT * FROM OrderSummary;
+
+
+--- ProductSales  
+
+CREATE VIEW ProductSales AS
+SELECT 
+    P.PRODUCTSNAME,
+    SUM(oi.QUANTITY) AS TotalSold
+FROM OrdersItem oi
+JOIN Products P ON oi.PRODUCTSID = P.PRODUCTSID
+GROUP BY P.PRODUCTSNAME;
+
+
+SELECT * FROM ProductSales;
+
+
+
+12.2 Indexes
+Indexes improve performance for frequent searches.
+Product name search index
+CREATE INDEX idx_products_name
+ON Products (PRODUCTSNAME);
+
+SELECT * FROM Products WHERE PRODUCTSNAME LIKE '%burger%';
+
+12.3 Triggers
+Automatic inventory update after order placement
+--TRIGGER ATUOMATE THE INVENTORY STORCK AUTOMATIALLY WHEN PRODUCT IS ORDERES
+
+
+CREATE TRIGGER trg_UpdateInventory
+ON OrdersItem
+AFTER INSERT
+AS
+BEGIN
+    UPDATE Inventory
+    SET QUANTITYAVAILABLE = QUANTITYAVAILABLE - i.QUANTITY
+    FROM Inventory inv
+    JOIN inserted i ON inv.PRODUCTSID = i.PRODUCTSID;
+END;
+--TRIGGER ATUOMATE THE INVENTORY STORCK AUTOMATIALLY WHEN PRODUCT IS ORDERES
+
+
+CREATE TRIGGER trg_UpdateInventory
+ON OrdersItem
+AFTER INSERT
+AS
+BEGIN
+    UPDATE Inventory
+    SET QUANTITYAVAILABLE = QUANTITYAVAILABLE - i.QUANTITY
+    FROM Inventory inv
+    JOIN inserted i ON inv.PRODUCTSID = i.PRODUCTSID;
+END;
+
+
+12.4 Stored Procedures
+PlaceOrder
+AddProduct
+STORED PROCEDURES — Perform tasks with one call
+CREATE PROCEDURE AddProduct
+    @name NVARCHAR(100),
+    @desc NVARCHAR(255),
+    @catid INT,
+    @price DECIMAL(10,2)
+AS
+BEGIN
+    INSERT INTO Products (PRODUCTSNAME, DESCRIPTION, CATEGORIESID, PRICE)
+    VALUES (@name, @desc, @catid, @price);
+END;
+
+
+
+
+=============================
+
+
+EXEC PlaceOrders 
+    @UserID = 1,       -- ID of the customer
+    @VendorID = 2,     -- ID of the vendor
+    @Total = 1250.00;  -- total amount of the order
+
+
+13. RealWorld SQL Queries Implemented
+1.Get all orders by a user
+2.Order summary with items
+3.Total revenue per vendor
+4.Top selling products
+5.Average product ratings
+6.Delivery status tracking
+7.Daily order count
+8.Top customers by spending
+9.Low stock alerts
+10.Product search by keyword
+
+--1.GET ALL ORDERS BY A USER(CUSTOMER OR VENDOR )
+--WHAT WE NEED:USER TABLE, ORDER TABLE ,VENDOR TABLE
+
+SELECT 
+    Orders.ORDERSID,
+    Orders.ORDERUPDATE AS ORDERDATE,
+    Orders.TOTALAMOUNT,
+    Vendors.VENDORNAME
+FROM Orders
+INNER JOIN Vendors
+    ON Orders.VENDORID = Vendors.VENDORID;
+
+
+    SELECT 
+    Orders.ORDERSID,
+    Orders.ORDERUPDATE AS ORDERDATE,
+    Orders.TOTALAMOUNT,
+    Users.FULLNAME
+FROM Orders
+INNER JOIN Users
+    ON Orders.USERID = Users.USERID
+WHERE Users.USERID = 2;
+
+
+--2.ORDER SUMMARY WITH ITEMS 
+--what we need:ORDER ,ORDERITEMS,PRODUCTS
+SELECT 
+    o.ORDERSID,
+    p.PRODUCTSNAME,
+    oi.QUANTITY,
+    oi.PRICE
+FROM Orders o
+INNER JOIN OrdersItems oi
+    ON o.ORDERSID = oi.ORDERSID
+INNER JOIN Products p
+    ON oi.PRODUCTSID = p.PRODUCTSID;
+
+
+
+--3.TOTAL REVENUE GENERATED BY EACH VENDER
+--hint dese
+SELECT 
+    V.VENDORNAME,
+    SUM(O.TOTALAMOUNT) AS TOTALREVENUE
+FROM Orders O
+INNER JOIN Vendors V
+    ON O.VENDORID = V.VENDORID
+GROUP BY V.VENDORNAME;
+--next step
+--ORDER BY TOTALREVENUE ASC;
+
+
+--4.TOP 5 BESTSELLING PRODUCTS
+
+--what we need : product ordersitems 
+SELECT 
+    p.PRODUCTSNAME,
+    SUM(oi.QUANTITY) AS TOTALSOLD
+FROM OrdersItems oi
+INNER JOIN Products p
+    ON oi.PRODUCTSID = p.PRODUCTSID
+GROUP BY p.PRODUCTSNAME
+ORDER BY TOTALSOLD DESC
+--next step
+--offset 0rows fetch next 3 rows only ;
+
+--5.AVERAGE PRODUCTS RATING
+SELECT 
+    p.PRODUCTSNAME,
+    AVG(r.RATING) AS AVERAGE_RATING
+FROM Reviews r
+INNER JOIN Products p
+    ON r.PRODUCTSID = p.PRODUCTSID
+GROUP BY p.PRODUCTSNAME
+ORDER BY AVERAGE_RATING ;
+
+--6.DELIVERY STATUS OF A PARTICULAR ORDER 
+SELECT 
+    O.ORDERSID,
+    S.STATUSNAME,
+    DS.UPDATEDAT
+FROM DeliveryStatus DS
+INNER JOIN Orders O
+    ON DS.ORDERSID = O.ORDERSID
+INNER JOIN Status S
+    ON DS.STATUSID = S.STATUSID
+WHERE O.ORDERSID = 5;   -- change to any order ID you want
+
+--7.DALIY ORDER COUNT
+SELECT 
+    CAST(ORDERUPDATE AS DATE) AS ORDERDATE,
+    COUNT(*) AS DAILY_ORDER_COUNT
+FROM Orders
+GROUP BY CAST(ORDERUPDATE AS DATE)
+ORDER BY ORDERDATE ASC;
+
+--8.TO CUSTOMERS BY ORDER VALUE 
+SELECT 
+    U.FULLNAME,
+    SUM(O.TOTALAMOUNT) AS TOTAL_SPENT
+FROM Orders O
+INNER JOIN Users U
+    ON O.USERID = U.USERID
+GROUP BY U.FULLNAME
+ORDER BY TOTAL_SPENT DESC;   -- highest spenders first
+--9.LOW STOCK PRODUCTS PER VENDER
+SELECT
+    V.VENDORNAME,
+    P.PRODUCTSNAME,
+    I.QUANTITYAVAILABLE
+FROM Inventory I
+INNER JOIN Vendors V
+    ON I.VENDORID = V.VENDORID
+INNER JOIN Products P
+    ON I.PRODUCTSID = P.PRODUCTSID
+WHERE I.QUANTITYAVAILABLE < 0   -- Low stock threshold
+ORDER BY V.VENDORNAME, I.QUANTITYAVAILABLE ASC;
+
+--10 SEARCH PRODUCTS BY KEYWORD (FLEXIBLE QUERY)
+SELECT 
+    PRODUCTSNAME,
+    PRICE,
+    DESCRIPTION
+FROM Products
+WHERE PRODUCTSNAME LIKE '%burger%';  -- change keyword
+
+
+14. Security & RoleBased Access Control
+Roles
+Admin Role: Full access
+Vendor Role: Limited access
+Permissions
+Admin: SELECT, INSERT, UPDATE, DELETE
+Vendor: SELECT, INSERT, UPDATE
+--1 create sql server login
+create login adminlogin with password = 'mohsin@123'
+create login vendorlogin with password = 'mohsn@123'
+
+--map login to data user 
+use moh;
+create user admin_user  for login adminlogin;
+create user Vendor_user  for login Vendorlogin;
+
+--3 create role
+create role adminRole;
+create role VendorRole;
+
+--4 assign user to roles
+alter role Adminrole Add member admin_user ;
+exec sp_addrolemember 'VendorRole','Vendor_user';
+
+--5 Grant /revoke permisssion to role 
+GRANT SELECT, INSERT, UPDATE, DELETE TO adminRole;
+GRANT SELECT, INSERT, UPDATE TO VendorRole;
+
+
+
+Database Design Notes
+Instructor Lectures
