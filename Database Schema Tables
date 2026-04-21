@@ -1,0 +1,125 @@
+<h1>🗄️ Database Schema</h1>
+
+<h2>👤 Users</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>USERID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>FULLNAME</td><td>NVARCHAR(100)</td><td></td><td>Customer Name</td></tr>
+<tr><td>EMAIL</td><td>NVARCHAR(100)</td><td>UNIQUE</td><td>No duplicates allowed</td></tr>
+<tr><td>PHONENAME</td><td>NVARCHAR(11)</td><td></td><td>Phone Number</td></tr>
+<tr><td>CREATEAT</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+</table>
+
+<h2>📍 Addresses</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>ADDRESSESID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>USERID</td><td>INT</td><td>FK</td><td>Links to Users</td></tr>
+<tr><td>ADDRESSLINE</td><td>NVARCHAR(255)</td><td></td><td>Full Address</td></tr>
+<tr><td>CITY</td><td>NVARCHAR(100)</td><td></td><td>Multiple users can share city</td></tr>
+<tr><td>STATE</td><td>NVARCHAR(100)</td><td></td><td>State</td></tr>
+<tr><td>PINCODE</td><td>NVARCHAR(10)</td><td></td><td>Postal Code</td></tr>
+<tr><td>CREATEDAT</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+</table>
+
+<h2>🏪 Vendors</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>VENDORID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>VENDORNAME</td><td>NVARCHAR(255)</td><td></td><td>Vendor Name</td></tr>
+<tr><td>CONTACTMAIL</td><td>NVARCHAR(100)</td><td></td><td>Email</td></tr>
+<tr><td>CREATEDAT</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+</table>
+
+<h2>📂 ProductCategories</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>CATEGORIESID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>CATEGORIESNAME</td><td>NVARCHAR(100)</td><td></td><td>Not Null</td></tr>
+</table>
+
+<h2>📦 Products</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>PRODUCTSID</td><td>INT</td><td>PK</td><td>Identity(1,1)</td></tr>
+<tr><td>PRODUCTSNAME</td><td>NVARCHAR(100)</td><td></td><td>Not Null</td></tr>
+<tr><td>DESCRIPTION</td><td>NVARCHAR(255)</td><td></td><td>Product Description</td></tr>
+<tr><td>CATEGORIESID</td><td>INT</td><td>FK</td><td>Links to ProductCategories</td></tr>
+<tr><td>PRICE</td><td>DECIMAL(10,2)</td><td></td><td>Product Price</td></tr>
+<tr><td>CREATEDAT</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+</table>
+
+<h2>📊 Inventory</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>INVENTORYID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>VENDORID</td><td>INT</td><td>FK</td><td>Links to Vendors</td></tr>
+<tr><td>PRODUCTSID</td><td>INT</td><td>FK</td><td>Links to Products</td></tr>
+<tr><td>QUANTITYAVAILABLE</td><td>INT</td><td></td><td>Stock Level</td></tr>
+<tr><td>LASTUPDATED</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+</table>
+
+<h2>🧾 Orders</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>ORDERSID</td><td>INT</td><td>PK</td><td>Identity(1,1)</td></tr>
+<tr><td>VENDORID</td><td>INT</td><td>FK</td><td>Links to Vendors</td></tr>
+<tr><td>USERID</td><td>INT</td><td>FK</td><td>Links to Users</td></tr>
+<tr><td>ORDERUPDATE</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+<tr><td>TOTALAMOUNT</td><td>DECIMAL(10,2)</td><td></td><td>Total Order Amount</td></tr>
+</table>
+
+<h2>🛒 OrdersItem</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>ORDERSITEMID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>ORDERSID</td><td>INT</td><td>FK</td><td>Links to Orders</td></tr>
+<tr><td>PRODUCTSID</td><td>INT</td><td>FK</td><td>Links to Products</td></tr>
+<tr><td>QUANTITY</td><td>INT</td><td></td><td>Item Quantity</td></tr>
+<tr><td>PRICE</td><td>DECIMAL(10,2)</td><td></td><td>Price at Order Time</td></tr>
+</table>
+
+<h2>💳 Payments</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>PAYMENTID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>ORDERSID</td><td>INT</td><td>FK</td><td>Links to Orders</td></tr>
+<tr><td>PAYMENTMODE</td><td>NVARCHAR(50)</td><td></td><td>Cash, Card, etc.</td></tr>
+<tr><td>PAYMENTSTATUS</td><td>NVARCHAR(50)</td><td></td><td>Pending, Paid, Failed</td></tr>
+<tr><td>PAIDAT</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+</table>
+
+<h2>🚚 DeliveryPayments</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>PARTNERID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>FULLNAME</td><td>NVARCHAR(50)</td><td></td><td>Partner Name</td></tr>
+<tr><td>PAYMENTSTATUS</td><td>NVARCHAR(11)</td><td></td><td>⚠️ Add FK (ORDERSID missing)</td></tr>
+</table>
+
+<h2>📌 Status</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>STATUSID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>STATUSNAME</td><td>NVARCHAR(50)</td><td></td><td>e.g., Delivered</td></tr>
+</table>
+
+<h2>🚀 DeliveryStatus</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>DELIVERYID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>ORDERSID</td><td>INT</td><td>FK</td><td>Links to Orders</td></tr>
+<tr><td>STATUSID</td><td>INT</td><td>FK</td><td>Links to Status</td></tr>
+<tr><td>UPDATEDAT</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+</table>
+
+<h2>⭐ Reviews</h2>
+<table border="1">
+<tr><th>Column Name</th><th>Data Type</th><th>Key</th><th>Description</th></tr>
+<tr><td>REVIEWSID</td><td>INT</td><td>PK</td><td>Primary Key</td></tr>
+<tr><td>USERID</td><td>INT</td><td>FK</td><td>Links to Users</td></tr>
+<tr><td>PRODUCTSID</td><td>INT</td><td>FK</td><td>Links to Products</td></tr>
+<tr><td>RATING</td><td>INT</td><td></td><td>Check (1–5)</td></tr>
+<tr><td>COMMENT</td><td>NVARCHAR(150)</td><td></td><td>Review Text</td></tr>
+<tr><td>CREATEDAT</td><td>DATETIME</td><td></td><td>Default: Current Date</td></tr>
+</table>
