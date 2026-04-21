@@ -1,8 +1,12 @@
 
-11. SQL Implementation
-11.1Database Creation
+SQL Server project code
+
+--Database Creation
 CREATE DATABASE FOODAPP;
-11.2Tables Implemented
+
+
+Tables Implemented
+
 -- 1.Users table
 
 CREATE TABLE Users(
